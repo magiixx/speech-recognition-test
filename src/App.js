@@ -1,25 +1,78 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
 
-function App() {
+const VoiceToText = () => {
+  const [text, setText] = useState('');
+  const [status, setStatus] = useState('');
+  const [recognition, setRecognition] = useState(null);
+
+  const getInstance = () => {
+    const SpeechRecognition = window?.SpeechRecognition || window?.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const instance = new SpeechRecognition();
+      instance.continuous = true;
+    
+
+      instance.onstart = () => {
+        console.log("starting listening, speak in microphone");
+        setStatus('RECORDING');
+      };
+  
+      instance.onspeechend = () => {
+        console.log("stopped listening");
+        setStatus('');
+        instance.stop();
+      };
+  
+      instance.onresult = (event) => {
+        const current = event.resultIndex;
+        const transcript = event.results[current][0].transcript;
+        const mobileRepeatBug = (current === 1 && transcript === event.results[0][0].transcript);
+  
+        if (!mobileRepeatBug) {
+          setText((prevText) => prevText + transcript);
+        }
+      };
+  
+      instance.onerror = (event) => {
+        if (event.error === 'no-speech') {
+          setStatus('NO_SPEECH');
+        }
+      };
+  
+      return instance
+    }
+  }
+
+  useEffect(() => {
+    const instance = getInstance();
+    if (instance) {
+      setRecognition(instance)
+    }
+  }, []);
+
+  const handleClick = () => {
+    console.log("clicked microphone");
+    if(status !== 'RECORDING') {
+      recognition.start();
+    } else {
+      recognition.stop();
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <input
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        style={{ marginBottom: '10px', padding: '5px', fontSize: '16px', width: '80%' }}
+      />
+      <button onClick={handleClick} style={{ padding: '5px 10px', fontSize: '16px' }}>
+        {status === 'RECORDING' ? 'Stop Recording' : 'Record Voice'}
+      </button>
+     {status === 'NO_SPEECH' && <p style={{ marginTop: '10px', fontSize: '14px', color: 'red' }}>No speech detected.</p>}
     </div>
   );
-}
+};
 
-export default App;
+export default VoiceToText;
