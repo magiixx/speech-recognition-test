@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/speech-recognition-test/static/js/main.ec862540.js",
+    "main.js": "/speech-recognition-test/static/js/main.4314506d.js",
     "index.html": "/speech-recognition-test/index.html",
-    "main.ec862540.js.map": "/speech-recognition-test/static/js/main.ec862540.js.map"
+    "main.4314506d.js.map": "/speech-recognition-test/static/js/main.4314506d.js.map"
   },
   "entrypoints": [
-    "static/js/main.ec862540.js"
+    "static/js/main.4314506d.js"
   ]
 }

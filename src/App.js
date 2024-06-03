@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 const VoiceToText = () => {
   const [text, setText] = useState('');
+  const [interim, setInterim] = useState('');
   const [status, setStatus] = useState('');
   const [recognition, setRecognition] = useState(null);
 
@@ -10,6 +11,7 @@ const VoiceToText = () => {
     if (SpeechRecognition) {
       const instance = new SpeechRecognition();
       instance.continuous = true;
+      instance.interimResults = true;
     
 
       instance.onstart = () => {
@@ -25,11 +27,17 @@ const VoiceToText = () => {
   
       instance.onresult = (event) => {
         const current = event.resultIndex;
+        const isFinal = event.results[current].isFinal;
         const transcript = event.results[current][0].transcript;
         const mobileRepeatBug = (current === 1 && transcript === event.results[0][0].transcript);
   
         if (!mobileRepeatBug) {
-          setText((prevText) => prevText + transcript);
+          if(isFinal) {
+            setText((prevText) => prevText + transcript);
+            setInterim('');
+          } else {
+            setInterim(transcript);
+          }
         }
       };
   
@@ -63,7 +71,7 @@ const VoiceToText = () => {
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <input
         type="text"
-        value={text}
+        value={`${text} ${interim ? `${interim}...` : ''}`}
         onChange={(e) => setText(e.target.value)}
         style={{ marginBottom: '10px', padding: '5px', fontSize: '16px', width: '80%' }}
       />
